@@ -1,0 +1,23 @@
+{
+  "name": "PS1 Industrial Remade (16)",
+  "description": "Authentic 16-color industrial PS1 machinery palette with steel violet-grays, hazard warning orange/ember rust ramp, and cold machinery cyan",
+  "style_tags": ["ps1", "industrial", "hazard", "steel"],
+  "colors": [
+    "#111111",
+    "#2a2a3a",
+    "#4e4a5e",
+    "#6e6879",
+    "#948ea0",
+    "#beb7c9",
+    "#3a2024",
+    "#6b3133",
+    "#a0463a",
+    "#d86743",
+    "#f2a65a",
+    "#ffd99b",
+    "#1c2838",
+    "#2e4f6d",
+    "#4c7fa3",
+    "#79b4c7"
+  ]
+}

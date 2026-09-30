@@ -1,0 +1,10 @@
+{
+  "name": "Cyberpunk Neon (16)",
+  "description": "16-color high contrast synthwave and neon cyberpunk palette",
+  "colors": [
+    "#080811", "#121124", "#201a3d", "#3b1e54",
+    "#711c91", "#ea00d9", "#ff007f", "#0abdc6",
+    "#133e7c", "#091833", "#00ffcc", "#70ff00",
+    "#ffe600", "#ff5900", "#d3f4ff", "#ffffff"
+  ]
+}

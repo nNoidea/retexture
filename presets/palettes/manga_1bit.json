@@ -1,0 +1,10 @@
+{
+  "id": "manga_1bit",
+  "name": "Manga / 1-Bit Monochrome",
+  "description": "Pure black and white 2-color palette for 1-bit Mac and classic manga cross-hatching.",
+  "style_tags": ["one-bit", "noir", "crosshatch"],
+  "colors": [
+    "#000000",
+    "#ffffff"
+  ]
+}

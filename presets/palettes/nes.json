@@ -1,0 +1,13 @@
+{
+  "name": "NES (54)",
+  "description": "Standard 54-color hardware palette of the Nintendo Entertainment System",
+  "colors": [
+    "#666666", "#002a88", "#1412a7", "#3b00a4", "#5c007e", "#6e0040", "#6c0600", "#561d00",
+    "#333500", "#0b4800", "#005200", "#004f08", "#00404d", "#000000", "#adadad", "#155fd9",
+    "#4240ff", "#7527fe", "#a01acc", "#b71e7b", "#b53120", "#994e00", "#6b6d00", "#388700",
+    "#0c9300", "#008f32", "#007c8d", "#000000", "#ffffff", "#64b0ff", "#9290ff", "#c676ff",
+    "#f36aff", "#fe6ecc", "#fe8176", "#e59e33", "#b6bd00", "#7dd600", "#46e300", "#1cf480",
+    "#21cbf3", "#4d4d4d", "#ffffff", "#c0e0ff", "#d3d2ff", "#e8c8ff", "#fbc2ff", "#fec4ea",
+    "#feccc5", "#f7d8a5", "#e4e594", "#cff094", "#b8f694", "#a8f9cd", "#a9effa", "#b0b0b0"
+  ]
+}

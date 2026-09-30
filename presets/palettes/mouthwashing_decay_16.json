@@ -1,0 +1,24 @@
+{
+  "name": "Mouthwashing Decay (16)",
+  "description": "Sickly PSX horror palette inspired by Mouthwashing (fluorescent decay, rust, dried blood, industrial grime)",
+  "author": "inspired by fluorescent decay, rust, dried blood, and industrial grime",
+  "style_tags": ["horror", "decay", "industrial", "warm-dark"],
+  "colors": [
+    "#0b0d0c",
+    "#181f1a",
+    "#283326",
+    "#3f523c",
+    "#5c7356",
+    "#829e7b",
+    "#c5dbbd",
+    "#261814",
+    "#4a241b",
+    "#7d3826",
+    "#b85635",
+    "#e08b5e",
+    "#54161b",
+    "#8c242c",
+    "#2d3d45",
+    "#557582"
+  ]
+}

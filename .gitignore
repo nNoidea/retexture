@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Packaging / Distribution
+build/
+dist/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Local User Workspace & Runtime Outputs
+custom_presets/
+custom_palettes/
+retrofied_textures/
+output/
+*.log
+
+# IDEs, Editors & OS Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Environment Variables & Local Secrets
+.env
+.env.*
+*.local

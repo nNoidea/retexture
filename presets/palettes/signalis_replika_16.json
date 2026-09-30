@@ -1,0 +1,24 @@
+{
+  "name": "Signalis Replika 16",
+  "author": "inspired by restrained surveillance-horror palettes",
+  "description": "Cold industrial neutrals with controlled red, amber, and teal accents.",
+  "style_tags": ["industrial", "surveillance-horror", "cool-neutral", "accent-red"],
+  "colors": [
+    "#0b0c10",
+    "#1f2833",
+    "#2e3944",
+    "#4f5d75",
+    "#7d8ca3",
+    "#c5c6c7",
+    "#ffffff",
+    "#d81159",
+    "#8f1d1d",
+    "#4a0e17",
+    "#ff5964",
+    "#f4d06f",
+    "#b88b4a",
+    "#593d19",
+    "#1a3038",
+    "#006466"
+  ]
+}

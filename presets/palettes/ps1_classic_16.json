@@ -1,0 +1,23 @@
+{
+  "name": "PS1 Classic Remade (16)",
+  "description": "Authentic 16-color balanced PS1 adventure palette with mauve shadow tones, warm terracotta/amber skin & wood ramp, and cool jade/teal accents",
+  "style_tags": ["ps1", "chunky", "warm-cool"],
+  "colors": [
+    "#101820",
+    "#2b2f4a",
+    "#4f4a66",
+    "#726d8a",
+    "#9a95ae",
+    "#c4bed0",
+    "#2a1b22",
+    "#5a2f3b",
+    "#8d4f4a",
+    "#b8775f",
+    "#d9a066",
+    "#ebcf9a",
+    "#1e3a3a",
+    "#2e5e5e",
+    "#4d8b8b",
+    "#8cc0a8"
+  ]
+}

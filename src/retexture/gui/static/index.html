@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retexture</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="/static/three.min.js"></script>
+</head>
+<body>
+  <div id="app" class="app-container">
+
+    <!-- Top Minimal Toolbar -->
+    <header class="top-nav">
+      <div class="nav-left">
+        <button id="btnToggleExplorer" class="panel-toggle-btn active" title="Toggle Texture File Explorer (Left Panel)">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+          <span>Textures</span>
+        </button>
+        <span class="app-title">RETEXTURE</span>
+        <span class="version-tag">v0.2</span>
+      </div>
+
+      <div class="nav-center">
+        <div class="view-tabs">
+          <button class="v-tab active" data-view="sidebyside">Side-by-Side</button>
+          <button class="v-tab" data-view="split">Split Slider</button>
+          <button class="v-tab" data-view="tiled">3×3 Tiled</button>
+          <button class="v-tab" data-view="3d">3D Mesh</button>
+        </div>
+        <button id="btnToggleNearest" class="pixel-toggle-btn active" title="Blender Texture Interpolation: Closest (Crisp Pixels) vs Linear (Smooth)">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><rect width="6" height="6" x="3" y="3"/><rect width="6" height="6" x="15" y="3"/><rect width="6" height="6" x="9" y="9"/><rect width="6" height="6" x="3" y="15"/><rect width="6" height="6" x="15" y="15"/></svg>
+          <span id="nearestLabel">Interpolation: Closest</span>
+        </button>
+      </div>
+
+      <div class="nav-right">
+        <label class="btn btn-secondary file-btn" title="Open texture image from computer">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Open Image</span>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+        </label>
+
+        <button id="btnSavePresetModal" class="btn btn-secondary" title="Save current config as preset">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>Save Preset</span>
+        </button>
+
+        <button id="btnCopyJson" class="btn btn-secondary" title="Copy config JSON to clipboard">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          <span>Copy JSON</span>
+        </button>
+
+        <button id="btnExportImage" class="btn btn-primary" title="Export current retro texture">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Export</span>
+        </button>
+
+        <div class="nav-sep"></div>
+
+        <button id="btnToggleSettings" class="panel-toggle-btn active" title="Toggle Settings Sidebar (Right Panel)">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-body">
+
+      <!-- Left Sidebar: Texture Asset Explorer & Bulk Queue -->
+      <aside class="explorer-sidebar" id="explorerSidebar">
+        <div class="explorer-header">
+          <div class="explorer-title-row">
+            <span class="explorer-heading">TEXTURE ASSETS</span>
+          </div>
+
+          <!-- Direct Folder Path Text Input Row: [path input] [Go] [Up] [Refresh] -->
+          <div class="folder-path-input-row">
+            <input type="text" id="explorerPathInput" class="input-text-sm flex-1" placeholder="Folder path (e.g. ./presets/samples)..." title="Type or paste folder path" />
+            <button id="btnGoPath" class="btn btn-secondary btn-sm" title="Jump to path">Go</button>
+            <button id="btnUpFolder" class="btn btn-secondary btn-sm btn-icon-only" title="Go up to parent directory">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
+            <button id="btnRefreshExplorer" class="btn btn-secondary btn-sm btn-icon-only" title="Refresh folder">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+            </button>
+          </div>
+
+          <!-- Common Locations Quick Row -->
+          <div class="quick-locations-row mt-1" id="explorerQuickLocations"></div>
+
+          <!-- Search Filter -->
+          <div class="search-row mt-1">
+            <input type="text" id="explorerSearchInput" placeholder="Filter textures in folder..." class="input-text-sm" />
+          </div>
+        </div>
+
+        <!-- Scrollable Texture List -->
+        <div class="explorer-file-list" id="explorerFileList">
+          <!-- Populated dynamically via API -->
+        </div>
+
+        <!-- Bulk Conversion Footer -->
+        <div class="explorer-bulk-footer">
+          <div class="bulk-select-row">
+            <label class="chk-label">
+              <input type="checkbox" id="chkSelectAllFiles" />
+              <span>Select All</span>
+            </label>
+            <span id="selectedCountText" class="selected-badge">0 selected</span>
+          </div>
+
+          <!-- Proper Button for Naming Pattern -->
+          <button id="btnOpenNamingModal" class="btn btn-secondary btn-sm w-full mt-1" title="Configure auto-rename pattern">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Pattern:</span>
+            <span id="currentPatternBadge">{name}</span>
+          </button>
+
+          <div class="form-group mt-1">
+            <label class="label-tiny">Save Output Destination Folder</label>
+            <div class="input-btn-wrap mt-1">
+              <input type="text" id="explorerOutFolderInput" value="./retrofied_textures" class="input-text-sm flex-1" placeholder="Save folder (e.g. ./output)..." title="Type or paste save destination path" />
+              <button id="btnBrowseOutFolder" class="btn btn-secondary btn-sm" title="Browse folders & files on disk">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+                <span>Browse...</span>
+              </button>
+            </div>
+          </div>
+
+          <button id="btnExplorerConvertBatch" class="btn btn-primary w-full mt-1" disabled>
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span id="btnExplorerConvertBatchText">Convert Selected (0)</span>
+          </button>
+
+          <div id="explorerBatchProgress" class="explorer-progress-wrap hidden">
+            <div class="progress-bar-wrap mt-1">
+              <div id="explorerProgressBar" class="progress-bar-fill"></div>
+            </div>
+            <div id="explorerBatchStatusText" class="progress-status-text"></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Resizer for Left Sidebar -->
+      <div class="sidebar-resizer resizer-left" id="resizerLeft" title="Drag to resize Left Explorer"></div>
+
+      <!-- Center Viewport -->
+      <section class="viewport-area" id="viewportArea">
+
+        <!-- Processing / AI Generation Floating HUD Indicator -->
+        <div id="processingIndicator" class="processing-hud hidden">
+          <div class="processing-spinner"></div>
+          <span id="processingStatusText">Processing Texture...</span>
+        </div>
+
+        <!-- 2D Canvas Stage -->
+        <div id="view2dWrapper" class="view2d-wrapper">
+          <div id="canvasStage" class="canvas-stage">
+            <canvas id="mainCanvas"></canvas>
+
+            <!-- Split Divider Line (Auto-hides on mouse leave) -->
+            <div id="splitDivider" class="split-divider hidden">
+              <div class="divider-handle">
+                <span class="divider-arrows">◀ ▶</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Viewport Wrapper -->
+        <div id="view3dWrapper" class="view3d-wrapper hidden">
+          <div id="canvas3dContainer" class="canvas-3d-container"></div>
+          
+            <div class="controls-3d-bar">
+            <div class="mesh-selector">
+              <button class="mesh-btn active" data-mesh="cube">Cube</button>
+              <button class="mesh-btn" data-mesh="sphere">Sphere</button>
+              <button class="mesh-btn" data-mesh="cylinder">Cylinder</button>
+              <button class="mesh-btn" data-mesh="plane">Plane</button>
+            </div>
+            <label class="chk-label" title="Toggle Orbiting Red & Green Point Lights">
+              <input type="checkbox" id="chkColoredLights" checked />
+              <span>💡 Point Lights</span>
+            </label>
+            <label class="chk-label" title="Toggle 3D Halftone Surface Dot Shading">
+              <input type="checkbox" id="chkHalftone3D" />
+              <span>🔲 Halftone 3D</span>
+            </label>
+            <label class="chk-label">
+              <input type="checkbox" id="chkAutoRotate" checked />
+              <span>Auto-Rotate</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Zoom Floating Bar -->
+        <div class="zoom-bar">
+          <button id="btnZoomIn" class="zoom-btn" title="Zoom In">+</button>
+          <button id="btnZoomReset" class="zoom-btn" title="Reset Zoom">100%</button>
+          <button id="btnZoomOut" class="zoom-btn" title="Zoom Out">−</button>
+        </div>
+
+      </section>
+
+      <!-- Resizer for Right Sidebar -->
+      <div class="sidebar-resizer resizer-right" id="resizerRight" title="Drag to resize Right Controls"></div>
+
+      <!-- Right Control Sidebar -->
+      <aside class="sidebar mode-simple" id="controlsSidebar">
+        <div class="sidebar-scroll">
+
+          <!-- Mode Switcher: Simple vs Pro -->
+          <div class="mode-toggle-card">
+            <div class="mode-segmented-control" role="tablist">
+              <button type="button" class="mode-btn active" id="btnModeSimple" data-mode="simple" role="tab" aria-selected="true" title="Simple Mode: Fast, curated presets and high-impact macro controls">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>Simple</span>
+              </button>
+              <button type="button" class="mode-btn" id="btnModePro" data-mode="pro" role="tab" aria-selected="false" title="Pro Mode: Unfold full granular controls & shader parameters">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Pro</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets -->
+          <div class="card">
+            <div class="card-title">
+              <span>PRESET</span>
+              <div class="flex-row items-center gap-1">
+                <button id="btnRandomPreset" class="section-rand-btn" title="Pick a random preset from library">
+                  <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.41 2.41 0 0 0 0-3.41l-4.5-4.5a2.41 2.41 0 0 0-3.41 0L10 6.09"/><circle cx="6" cy="14" r=".5" fill="currentColor"/><circle cx="10" cy="18" r=".5" fill="currentColor"/><circle cx="14" cy="6" r=".5" fill="currentColor"/><circle cx="18" cy="10" r=".5" fill="currentColor"/></svg>
+                  <span>Random</span>
+                </button>
+                <span id="autoSaveIndicator" class="autosave-tag">Saved</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <select id="configPresetSelect" class="input-select" title="Loads a preset — a complete saved setup of every setting below"></select>
+            </div>
+            <button id="btnOpenPresetsModal" class="btn btn-secondary w-full mt-1" title="Browse autosave history and your saved custom presets">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Presets Library & History</span>
+            </button>
+          </div>
+
+          <!-- Sizing & Format -->
+          <div class="card">
+            <div class="card-title">
+              <span>RESOLUTION & FORMAT</span>
+              <div class="flex-row items-center gap-1">
+                <button id="btnRandomResolution" class="section-rand-btn" title="Randomize Resolution & Filter">
+                  <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.41 2.41 0 0 0 0-3.41l-4.5-4.5a2.41 2.41 0 0 0-3.41 0L10 6.09"/><circle cx="6" cy="14" r=".5" fill="currentColor"/><circle cx="10" cy="18" r=".5" fill="currentColor"/><circle cx="14" cy="6" r=".5" fill="currentColor"/><circle cx="18" cy="10" r=".5" fill="currentColor"/></svg>
+                  <span>Random</span>
+                </button>
+                <button id="btnLockResolution" class="lock-res-btn" title="Lock resolution so switching presets won't change your selected size">
+                  <svg class="icon icon-xs" id="lockResIcon" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                  <span id="lockResText">Unlocked</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="form-group" id="resolutionSliderWrap">
+              <div class="slider-header">
+                <label title="Target texture resolution (shortest side). Scales proportionally to keep aspect ratio">Resolution Scale</label>
+                <span id="valResolution" class="val-tag">128px</span>
+              </div>
+              <input type="range" id="sliderResolution" min="32" max="512" value="128" step="32" class="slider" title="Target texture resolution (shortest side) in steps of 32px" />
+            </div>
+
+            <button id="btnOriginalSize" type="button" class="btn-original-size w-full" title="Keep the image at its original native resolution without any resizing">
+              <span>Original (1:1 Native Resolution)</span>
+            </button>
+
+            <div class="grid-2 mt-2 pro-only">
+              <div class="form-group">
+                <label title="How pixels are recalculated when the size changes. Nearest keeps crisp edges, Lanczos is smoothest">Resampling</label>
+                <select id="resizeFilterSelect" class="input-select" title="How pixels are recalculated when the size changes. Nearest keeps crisp edges, Lanczos is smoothest">
+                  <option value="nearest">Nearest (Point)</option>
+                  <option value="k_centroids">K-Centroids (Edge-Snapping)</option>
+                  <option value="box">Box (Area Avg)</option>
+                  <option value="bilinear">Bilinear</option>
+                  <option value="bicubic">Bicubic</option>
+                  <option value="lanczos">Lanczos</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label title="File format of the exported texture. PNG is lossless, JPG is smaller but slightly lossy">Format</label>
+                <select id="exportFormatSelect" class="input-select" title="File format of the exported texture. PNG is lossless, JPG is smaller but slightly lossy">
+                  <option value="png">PNG (Lossless)</option>
+                  <option value="jpg">JPG</option>
+                  <option value="webp">WebP</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Color: Palette + Grading -->
+          <div class="card">
+            <div class="card-title">
+              <span>COLOR</span>
+              <div class="flex-row items-center gap-1">
+                <button id="btnRandomPalette" class="section-rand-btn" title="Randomize palette, distance metric and color grading">
+                  <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.41 2.41 0 0 0 0-3.41l-4.5-4.5a2.41 2.41 0 0 0-3.41 0L10 6.09"/><circle cx="6" cy="14" r=".5" fill="currentColor"/><circle cx="10" cy="18" r=".5" fill="currentColor"/><circle cx="14" cy="6" r=".5" fill="currentColor"/><circle cx="18" cy="10" r=".5" fill="currentColor"/></svg>
+                  <span>Random</span>
+                </button>
+                <button id="btnResetColors" class="btn-text" title="Reset all color settings to their defaults">Reset</button>
+              </div>
+            </div>
+
+            <div id="palettePresetGroup" class="form-group">
+              <label title="Which retro palette your image gets limited to">Palette</label>
+              <select id="palettePresetSelect" class="input-select" title="Which retro palette your image gets limited to"></select>
+              <div id="paletteSwatches" class="swatches-wrap"></div>
+              <button id="btnImportPalette" class="btn btn-secondary w-full mt-1" type="button" title="Import a Lospec 1x or 32x PNG palette into the local palette library">＋ Import Lospec PNG</button>
+              <input id="paletteFileInput" type="file" accept=".png,image/png" hidden />
+              <div class="form-hint">Accepts Lospec 1× or 32× PNG palette strips.</div>
+            </div>
+
+            <div class="form-group pro-only">
+              <label title="How 'closeness' between colors is judged when matching pixels to the palette. Oklab looks most natural to human eyes">Color Distance Metric</label>
+              <select id="colorMetricSelect" class="input-select" title="How 'closeness' between colors is judged when matching pixels to the palette. Oklab looks most natural to human eyes">
+                <option value="oklab">Oklab (Perceptual Retina - Recommended)</option>
+                <option value="cielab">CIELAB (Perceptual Delta-E)</option>
+                <option value="luma">Luma-Weighted (Rec. 709)</option>
+                <option value="euclidean">RGB Euclidean (Standard Math)</option>
+              </select>
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Rotates all colors around the color wheel. ±180 flips them to their opposites">Hue Shift</label>
+                <span id="valHue" class="val-tag">0°</span>
+              </div>
+              <input type="range" id="sliderHue" min="-180" max="180" value="0" step="1" class="slider" title="Rotates all colors around the color wheel. ±180 flips them to their opposites" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Color intensity. 1.0 = original, below mutes toward gray, above makes colors punchier">Saturation</label>
+                <span id="valSaturation" class="val-tag">1.15</span>
+              </div>
+              <input type="range" id="sliderSaturation" min="0.0" max="2.0" value="1.15" step="0.05" class="slider" title="Color intensity. 1.0 = original, below mutes toward gray, above makes colors punchier" />
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Lightens (above 1.0) or darkens (below 1.0) the whole image">Brightness</label>
+                <span id="valBrightness" class="val-tag">1.05</span>
+              </div>
+              <input type="range" id="sliderBrightness" min="0.5" max="1.5" value="1.05" step="0.02" class="slider" title="Lightens (above 1.0) or darkens (below 1.0) the whole image" />
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Tonal range. 1.0 = original, higher pushes lights and darks apart, lower flattens toward middle gray">Contrast</label>
+                <span id="valContrast" class="val-tag">1.12</span>
+              </div>
+              <input type="range" id="sliderContrast" min="0.5" max="1.5" value="1.12" step="0.02" class="slider" title="Tonal range. 1.0 = original, higher pushes lights and darks apart, lower flattens toward middle gray" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Warms the image toward orange/amber (+) or cools it toward blue (−)">Color Temperature (Warm/Cool)</label>
+                <span id="valColorTemp" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderColorTemp" min="-1.0" max="1.0" value="0.0" step="0.05" class="slider" title="Warms the image toward orange/amber (+) or cools it toward blue (−)" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Makes medium tones brighter (+) or deeper (−) without touching the darkest or lightest areas">Midtones Shaping</label>
+                <span id="valMidtones" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderMidtones" min="-1.0" max="1.0" value="0.0" step="0.05" class="slider" title="Makes medium tones brighter (+) or deeper (−) without touching the darkest or lightest areas" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Boosts (+) or softens (−) only the brightest parts of the image">Highlights Shaping</label>
+                <span id="valHighlights" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderHighlights" min="-1.0" max="1.0" value="0.0" step="0.05" class="slider" title="Boosts (+) or softens (−) only the brightest parts of the image" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Sets the gray level that splits 'light' from 'dark' for tone shaping">Luminance Threshold</label>
+                <span id="valLuminanceThreshold" class="val-tag">0.50</span>
+              </div>
+              <input type="range" id="sliderLuminanceThreshold" min="0.1" max="0.9" value="0.5" step="0.02" class="slider" title="Sets the gray level that splits 'light' from 'dark' for tone shaping" />
+            </div>
+
+            <div class="form-group pro-only">
+              <label class="chk-label" title="Flips brightness — lights become dark and vice versa. Useful for height maps and negatives">
+                <input type="checkbox" id="chkInvertLuminance" />
+                <span>Invert Luminance (Negative / Height Mask)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dithering & Noise -->
+          <div class="card">
+            <div class="card-title">
+              <span>DITHERING & NOISE</span>
+              <button id="btnRandomDither" class="section-rand-btn" title="Randomize Dither Algorithm, Strength & Grain">
+                <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.41 2.41 0 0 0 0-3.41l-4.5-4.5a2.41 2.41 0 0 0-3.41 0L10 6.09"/><circle cx="6" cy="14" r=".5" fill="currentColor"/><circle cx="10" cy="18" r=".5" fill="currentColor"/><circle cx="14" cy="6" r=".5" fill="currentColor"/><circle cx="18" cy="10" r=".5" fill="currentColor"/></svg>
+                <span>Random</span>
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label title="The pattern used to fake extra colors by mixing palette pixels">Dither Algorithm</label>
+              <select id="ditherAlgoSelect" class="input-select" title="The pattern used to fake extra colors by mixing palette pixels">
+                <option value="blue_noise">Blue Noise (Void-and-Cluster / Obra Dinn)</option>
+                <option value="dither_1bit_weighted">Weighted 1-Bit (Form-Aware Noir)</option>
+                <option value="bayer4x4">Bayer 4×4 (Classic PS1)</option>
+                <option value="yliluoma">Yliluoma (2-Color Optimal Blend)</option>
+                <option value="interlaced">Interlaced Checkerboard (PS1 / Saturn)</option>
+                <option value="crosshatch">Cross-Hatching 45° (PC-98 Manga)</option>
+                <option value="riemersma">Riemersma (Hilbert Fractal Curve)</option>
+                <option value="halftone_dot">Halftone (Dot Matrix)</option>
+                <option value="halftone_cross">Halftone (Cross-Hatch)</option>
+                <option value="bayer2x2">Bayer 2×2 (Coarse)</option>
+                <option value="bayer8x8">Bayer 8×8 (Fine)</option>
+                <option value="cluster_dot_4x4">Cluster Dot 4×4 (Print Halftone)</option>
+                <option value="cluster_dot_8x8">Cluster Dot 8×8 (Fine Print)</option>
+                <option value="line_halftone">Line Halftone (Horizontal Scanlines)</option>
+                <option value="dot_diffusion">Dot Diffusion (Knuth)</option>
+                <option value="floyd_steinberg">Floyd-Steinberg (Error Diffusion)</option>
+                <option value="atkinson">Atkinson (Vintage / High Contrast)</option>
+                <option value="stucki">Stucki (Wide Smooth Diffusion)</option>
+                <option value="burkes">Burkes (Classic Sharp)</option>
+                <option value="sierra">Sierra 3-Row (Balanced)</option>
+                <option value="sierra_two_row">Sierra Two-Row (Compact)</option>
+                <option value="sierra_lite">Sierra Lite (Fine Grain)</option>
+                <option value="jarvis_judice_ninke">Jarvis-Judice-Ninke (JJN)</option>
+                <option value="false_floyd_steinberg">False Floyd-Steinberg (Feathery)</option>
+                <option value="shiau_fan_1">Shiau-Fan 1 (Print)</option>
+                <option value="shiau_fan_2">Shiau-Fan 2</option>
+                <option value="shiau_fan_3">Shiau-Fan 3</option>
+                <option value="none">None (Direct Quantize)</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="ditherScaleWrap">
+              <div class="slider-header">
+                <label title="Enlarges the dither pattern — 2×–4× makes it bigger and chunkier (for ordered matrices)">Pattern Scale <span class="context-badge" id="scaleSupportBadge">Ordered</span></label>
+                <div class="scale-chips" id="ditherScaleGroup">
+                  <button type="button" class="scale-chip active" data-scale="1" title="Normal-size pattern">1×</button>
+                  <button type="button" class="scale-chip" data-scale="2" title="2× larger pattern">2×</button>
+                  <button type="button" class="scale-chip" data-scale="3" title="3× larger pattern">3×</button>
+                  <button type="button" class="scale-chip" data-scale="4" title="4× larger pattern">4×</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="How strongly the pattern is applied. 0 = clean flat color mapping, higher = more visible texture">Dither Strength</label>
+                <span id="valDitherStrength" class="val-tag">0.80</span>
+              </div>
+              <input type="range" id="sliderDitherStrength" min="0.0" max="1.5" value="0.8" step="0.05" class="slider" title="How strongly the pattern is applied. 0 = clean flat color mapping, higher = more visible texture" />
+            </div>
+
+            <div class="grid-2 pro-only">
+              <label class="chk-label" title="Calculates dithering in physical light-energy space (applies to Euclidean/Luma metrics; Oklab already operates in perceptual float space)">
+                <input type="checkbox" id="chkLinearColorSpace" checked />
+                <span>Linear Color</span>
+              </label>
+              <label class="chk-label" title="Turns semi-transparent pixels into a fine screen-door pattern of fully on/off pixels for old game engines (Requires RGBA input image)">
+                <input type="checkbox" id="chkAlphaStipple" checked />
+                <span>Alpha Stipple <span class="context-badge" id="alphaStippleBadge">RGBA</span></span>
+              </label>
+            </div>
+
+            <div class="form-group pro-only mt-1">
+              <div class="slider-header">
+                <label title="Adds subtle film-style noise. 0 = clean digital look">Film Grain</label>
+                <span id="valGrain" class="val-tag">0.06</span>
+              </div>
+              <input type="range" id="sliderGrain" min="0.0" max="0.3" value="0.06" step="0.01" class="slider" title="Adds subtle film-style noise. 0 = clean digital look" />
+            </div>
+
+            <div class="grid-2 pro-only">
+              <div class="form-group">
+                <label title="Random starting number for the grain pattern — same number always gives the same noise">Grain Seed</label>
+                <div class="input-btn-wrap">
+                  <input type="number" id="grainSeedInput" value="42" class="input-text" style="width: 70px;" title="Random starting number for the grain pattern — same number always gives the same noise" />
+                  <button id="btnRandomSeed" class="btn btn-secondary" title="Randomize Grain Seed">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.41 2.41 0 0 0 0-3.41l-4.5-4.5a2.41 2.41 0 0 0-3.41 0L10 6.09"/><circle cx="6" cy="14" r=".5" fill="currentColor"/><circle cx="10" cy="18" r=".5" fill="currentColor"/><circle cx="14" cy="6" r=".5" fill="currentColor"/><circle cx="18" cy="10" r=".5" fill="currentColor"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label title="Grain in neutral gray (more film-like) vs full-color speckle">Mode</label>
+                <label class="chk-label mt-1" title="Grain in neutral gray (more film-like) vs full-color speckle">
+                  <input type="checkbox" id="chkMonochromeGrain" checked />
+                  <span>Monochrome</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stylize & Structure -->
+          <div class="card">
+            <div class="card-title">
+              <span>STYLIZE & STRUCTURE</span>
+              <button id="btnRandomShaders" class="section-rand-btn pro-only" title="Randomize PixelOE, Outlines & Structuring">
+                <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.41 2.41 0 0 0 0-3.41l-4.5-4.5a2.41 2.41 0 0 0-3.41 0L10 6.09"/><circle cx="6" cy="14" r=".5" fill="currentColor"/><circle cx="10" cy="18" r=".5" fill="currentColor"/><circle cx="14" cy="6" r=".5" fill="currentColor"/><circle cx="18" cy="10" r=".5" fill="currentColor"/></svg>
+                <span>Random</span>
+              </button>
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Flattens photographic wall grain into smooth, clean planes while preserving razor-sharp door and window edges">Clean Surface (Kuwahara Filter)</label>
+                <span id="valKuwahara" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderKuwahara" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Flattens photographic wall grain into smooth, clean planes while preserving razor-sharp door and window edges" />
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Detects architectural silhouettes (doors, windows, trim) with automatic speckle noise rejection">Smart Outlines (Door & Window Edges)</label>
+                <span id="valOutline" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderOutline" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Detects architectural silhouettes (doors, windows, trim) with automatic speckle noise rejection" />
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Shapes photographic noise and pixel clusters into clean, authored illustrative pixel planes">Stylize & Clean (PixelOE)</label>
+                <span id="valPixelOE" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderPixelOE" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Shapes photographic noise and pixel clusters into clean, authored illustrative pixel planes" />
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Sharpens and accentuates boundaries between pixel planes for chunky retro edges">Edge Crunch (Pixel Sharpening)</label>
+                <span id="valEdgeCrunch" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderEdgeCrunch" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Sharpens and accentuates boundaries between pixel planes for chunky retro edges" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Controls how aggressively isolated noise speckles on flat walls are suppressed from edges (0 = raw Sobel, 1 = strict connected lines only)">Edge Noise Gate</label>
+                <span id="valEdgeNoiseGate" class="val-tag">0.50</span>
+              </div>
+              <input type="range" id="sliderEdgeNoiseGate" min="0.0" max="1.0" value="0.5" step="0.05" class="slider" title="Controls how aggressively isolated noise speckles on flat walls are suppressed from edges" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Softens the image slightly before processing to reduce harsh camera noise">Pre-Blur (Anti-Aliasing)</label>
+                <span id="valPreBlur" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderPreBlur" min="0.0" max="3.0" value="0.0" step="0.1" class="slider" title="Softens the image slightly before processing to reduce harsh camera noise" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Flattens high-frequency photo speckle into broad color planes before PixelOE/dithering">Smooth Diffuse (Bilateral Filter)</label>
+                <span id="valSmoothDiffuse" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderSmoothDiffuse" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Flattens high-frequency photo speckle into broad color planes before PixelOE/dithering" />
+            </div>
+
+            <div class="form-group pro-only">
+              <div class="slider-header">
+                <label title="Collapses smooth shading into flat tone bands (2–8 steps), like anime cel-shading. 0 = off">Cel-Shading Steps (Tone Tiers)</label>
+                <span id="valCelSteps" class="val-tag">Off</span>
+              </div>
+              <input type="range" id="sliderCelSteps" min="0" max="8" value="0" step="1" class="slider" title="Collapses smooth shading into flat tone bands (2–8 steps), like anime cel-shading. 0 = off" />
+            </div>
+          </div>
+
+          <!-- Retro Shader FX & Wear (Pro Only) -->
+          <div class="card pro-only">
+            <div class="card-title">
+              <span>RETRO SHADERS & WEAR</span>
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Adds procedural dirt, rust and surface wear — great for horror and abandoned places">Grime & Decay</label>
+                <span id="valGrime" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderGrime" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Adds procedural dirt, rust and surface wear — great for horror and abandoned places" />
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label title="Chooses the shape language of procedural wear">Grime Pattern</label>
+                <select id="grimeModeSelect" class="input-select">
+                  <option value="uniform">Uniform Mottling</option>
+                  <option value="streak">Vertical Streaks / Drips</option>
+                  <option value="edge_wear">Cavity / Edge Wear</option>
+                </select>
+              </div>
+              <label class="chk-label mt-2" title="Apply CRT effects after palette reduction to preserve authentic non-palette analog color fringing">
+                <input type="checkbox" id="chkBakeOpticalFx" />
+                <span>Bake Optical FX</span>
+              </label>
+            </div>
+
+            <div class="form-group mt-1">
+              <div class="slider-header">
+                <label title="Splits red and blue color channels horizontally for CRT lens fringing (use Bake Optical FX for non-palette fringing)">Chromatic Aberration</label>
+                <span id="valChromatic" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderChromatic" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Splits red and blue color channels horizontally for CRT lens fringing" />
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label title="Adds horizontal dark phosphor scanline bars">CRT Scanlines</label>
+                <span id="valScanlines" class="val-tag">0.00</span>
+              </div>
+              <input type="range" id="sliderScanlines" min="0.0" max="1.0" value="0.0" step="0.05" class="slider" title="Adds horizontal dark phosphor scanline bars" />
+            </div>
+          </div>
+
+          <!-- Seamless Tiling -->
+          <div class="card">
+            <div class="card-title">
+              <span>SEAMLESS TILING</span>
+            </div>
+
+            <div class="form-group">
+              <label class="chk-label" title="Makes the texture tile seamlessly without visible edge seams when repeated across 3D surfaces">
+                <input type="checkbox" id="chkSeamlessTiling" />
+                <span>Seamless Tiling (Repeat Edge Blend)</span>
+              </label>
+            </div>
+
+            <div id="seamlessTilingGroup" class="form-group hidden">
+              <div class="slider-header">
+                <label title="How much of the texture edges get blended together to hide the seam">Seam Blend Width</label>
+                <span id="valSeamSize" class="val-tag">0.20</span>
+              </div>
+              <input type="range" id="sliderSeamSize" min="0.05" max="0.45" value="0.20" step="0.01" class="slider" title="How much of the texture edges get blended together to hide the seam" />
+              <div class="form-group mt-2 pro-only">
+                <label title="How opposite edges are matched">Seam Method</label>
+                <select id="seamMethodSelect" class="input-select">
+                  <option value="offset_wrap">Offset Wrap (Recommended)</option>
+                  <option value="mirror">Mirror (Legacy)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- Mass Batch Convert Modal -->
+    <div id="batchModal" class="modal-backdrop hidden">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h3>Mass Batch Convert Textures</h3>
+          <button id="btnCloseBatchModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Select multiple image files to convert with your active preset settings.</p>
+          
+          <div class="form-group mt-2">
+            <label>Select Texture Files</label>
+            <input type="file" id="batchFilesInput" multiple accept="image/*" class="input-text" />
+          </div>
+
+          <div id="batchStatusArea" class="batch-status-area hidden">
+            <div class="progress-bar-wrap">
+              <div id="batchProgressBar" class="progress-bar-fill"></div>
+            </div>
+            <div id="batchLog" class="batch-log-text"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelBatch" class="btn btn-secondary">Cancel</button>
+          <button id="btnRunBatch" class="btn btn-primary">Start Conversion</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Presets Library & Autosave History Modal -->
+    <div id="presetsManagerModal" class="modal-backdrop hidden">
+      <div class="modal-window modal-lg">
+        <div class="modal-header">
+          <h3>Preset Library & Autosave History</h3>
+          <button id="btnClosePresetsModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body modal-split-body">
+          
+          <!-- Left Column: Autosave History (Max 100) -->
+          <div class="modal-col">
+            <div class="modal-col-header">
+              <span class="col-title">AUTOSAVE HISTORY (<span id="autosaveCount">0</span>/100)</span>
+              <button id="btnClearAutosaves" class="btn-text btn-danger-text">Clear History</button>
+            </div>
+            <div id="autosaveHistoryList" class="history-list mt-1"></div>
+          </div>
+
+          <div class="col-divider"></div>
+
+          <!-- Right Column: Custom Saved Presets -->
+          <div class="modal-col">
+            <div class="modal-col-header">
+              <span class="col-title">CUSTOM SAVED PRESETS</span>
+              <button id="btnModalSaveNew" class="btn-text">+ Save Current</button>
+            </div>
+            <div id="customPresetsList" class="custom-presets-list mt-1"></div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="btnClosePresetsManager" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Preset Modal -->
+    <div id="savePresetModal" class="modal-backdrop hidden">
+      <div class="modal-window modal-sm">
+        <div class="modal-header">
+          <h3>Save Custom Preset</h3>
+          <button id="btnCloseSavePresetModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Preset Name</label>
+            <input type="text" id="presetNameInput" placeholder="my_custom_style" class="input-text" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelSavePreset" class="btn btn-secondary">Cancel</button>
+          <button id="btnConfirmSavePreset" class="btn btn-primary">Save Preset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto-Rename Naming Pattern Modal -->
+    <div id="namingPatternModal" class="modal-backdrop hidden">
+      <div class="modal-window modal-md">
+        <div class="modal-header">
+          <h3>Auto-Rename & Export Pattern</h3>
+          <button id="btnCloseNamingModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="naming-help-text">
+            Customize how exported textures and bulk batches are automatically named. Type text or click any tag below to insert tokens into the template.
+          </div>
+
+          <div class="token-chips-wrap">
+            <button class="token-chip" data-token="{name}">+ {name}</button>
+            <button class="token-chip" data-token="{preset}">+ {preset}</button>
+            <button class="token-chip" data-token="{size}">+ {size}</button>
+            <button class="token-chip" data-token="{colors}">+ {colors}</button>
+            <button class="token-chip" data-token="{dither}">+ {dither}</button>
+          </div>
+
+          <div class="form-group mt-2">
+            <label>Template Pattern</label>
+            <input type="text" id="namingPatternInput" class="input-text" value="{name}" placeholder="e.g. {name}_{preset}_{size}" />
+          </div>
+
+          <div class="naming-preview-card mt-2">
+            <div class="naming-preview-label">LIVE PREVIEW</div>
+            <div class="naming-preview-row">
+              <span class="preview-orig-name">wall_stone.png</span>
+              <span class="preview-arrow">➔</span>
+              <span id="namingLivePreview" class="preview-result-name">wall_stone.png</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnResetNamingPattern" class="btn btn-secondary">Reset ({name})</button>
+          <button id="btnSaveNamingPattern" class="btn btn-primary">Apply Pattern</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Destination Save Folder Browser Modal -->
+    <div id="saveFolderModal" class="modal-backdrop hidden">
+      <div class="modal-window modal-lg">
+        <div class="modal-header">
+          <h3>
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+            <span>Choose Save Output Folder</span>
+          </h3>
+          <button id="btnCloseSaveFolderModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="naming-help-text">
+            Browse through directories and files on disk to choose where exported and batch textures will be saved.
+          </div>
+
+          <!-- Direct Path Navigation Bar -->
+          <div class="folder-path-input-row mt-2">
+            <input type="text" id="saveBrowserPathInput" class="input-text-sm flex-1" placeholder="Type or paste directory path..." />
+            <button id="btnSaveBrowserGo" class="btn btn-secondary btn-sm" title="Jump to path">Go</button>
+            <button id="btnSaveBrowserUp" class="btn btn-secondary btn-sm" title="Go up to parent directory">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+              <span>Up</span>
+            </button>
+            <button id="btnSaveBrowserRefresh" class="btn btn-secondary btn-sm btn-icon-only" title="Refresh folder contents">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+            </button>
+            <button id="btnSaveBrowserNewFolder" class="btn btn-secondary btn-sm" title="Create a new folder in this directory">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>New Folder</span>
+            </button>
+          </div>
+
+          <!-- Quick Jump Locations -->
+          <div class="quick-locations-row mt-1" id="saveBrowserQuickLocations"></div>
+
+          <!-- Directory Contents List: Folders & Files -->
+          <div class="save-browser-file-list mt-2" id="saveBrowserFileList">
+            <!-- Dynamically populated with folders and files -->
+          </div>
+
+          <div class="save-browser-footer-selection mt-2">
+            <div class="label-tiny">Target Save Folder:</div>
+            <div class="selected-save-path-badge" id="saveBrowserCurrentPath">/path/to/folder</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelSaveFolder" class="btn btn-secondary">Cancel</button>
+          <button id="btnConfirmSaveFolder" class="btn btn-primary">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Select This Folder</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Overwrite Warning Modal -->
+    <div id="overwriteModal" class="modal-backdrop hidden">
+      <div class="modal-window modal-md">
+        <div class="modal-header">
+          <h3>
+            <svg class="icon icon-md" style="color: var(--accent-amber);" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span id="overwriteModalTitle">Existing Files Detected</span>
+          </h3>
+          <button id="btnCloseOverwriteModal" class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p id="overwriteModalSubtitle" class="modal-desc">Files with the same name already exist in the export destination folder.</p>
+
+          <div class="overwrite-alert-box mb-2">
+            <span id="overwriteCountSummary" class="overwrite-count-highlight">3 of 5 files already exist</span> in:
+            <div id="overwriteTargetFolder" class="selected-save-path-badge mt-1">./retrofied_textures</div>
+          </div>
+
+          <div class="label-tiny mb-1">Conflicting Output Files:</div>
+          <div id="overwriteFilesList" class="overwrite-files-scroll">
+            <!-- Dynamically populated list -->
+          </div>
+
+          <p class="modal-desc mt-2">
+            You can <strong>Overwrite</strong> the existing files, or <strong>Cancel</strong> to change the <strong>naming pattern</strong> (e.g. add tags like <code>{preset}</code> or <code>{size}</code>) or choose a different <strong>export folder</strong>.
+          </p>
+        </div>
+
+        <div class="modal-footer overwrite-footer">
+          <div class="overwrite-footer-left">
+            <button id="btnOverwriteChangePattern" class="btn btn-secondary btn-sm" title="Change the auto-rename naming pattern">
+              <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+              <span>Change Pattern...</span>
+            </button>
+            <button id="btnOverwriteChangeFolder" class="btn btn-secondary btn-sm" title="Choose a different destination folder">
+              <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+              <span>Change Folder...</span>
+            </button>
+          </div>
+          <div class="overwrite-footer-right">
+            <button id="btnCancelOverwrite" class="btn btn-secondary">Cancel</button>
+            <button id="btnConfirmOverwrite" class="btn btn-danger">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              <span id="btnConfirmOverwriteText">Overwrite Files</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications (Centered on screen) -->
+    <div id="toastContainer" class="toast-wrap"></div>
+
+  </div>
+
+  <script src="/static/icons.js"></script>
+  <script src="/static/viewer3d.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

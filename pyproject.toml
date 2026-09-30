@@ -1,0 +1,24 @@
+[project]
+name = "retexture"
+version = "0.2.0"
+description = "Retro texture conversion pipeline, batch CLI tool, and interactive studio"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "AGPL-3.0-only" }
+dependencies = [
+    "click>=8.5.0",
+    "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "numpy>=2.0.0",
+    "pillow>=10.0.0",
+    "pytest>=8.0.0",
+    "python-multipart>=0.0.32",
+    "uvicorn[standard]>=0.30.0",
+]
+
+[project.scripts]
+retexture = "retexture.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
